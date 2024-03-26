@@ -58,3 +58,18 @@ const userSchema = new Schema({
         }
     ]
 });
+
+userSchema.methods.changePassword = async function(newPassword) {
+    try {
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+      this.password = hashedPassword;
+      await this.save();
+      return true;
+    } catch (error) {
+      console.error('Error changing password:', error);
+      return false;
+    }
+  };
+
+  module.exports = mongoose.model('User', userSchema);

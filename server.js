@@ -24,11 +24,28 @@ app.use('/api/types', TypeRoutes);
 app.use('/api/auth', AuthRoutes);
 app.use('/api/comments', CommentRoutes);
 
-app.get("/nesto",(req,res)=>res.json("rutica"));
+app.get("/api/nesto",(req,res)=>res.json("rutica"));
 app.use("/",(req,res,next)=>res.json("Failed route"))
 
+const logRequest = (req, res, next) => {
+  const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  console.log(`[${new Date().toISOString()}] ${clientIp} ${req.method} ${req.url}`);
+  next();
+};
+
+const logResponse = (req, res, next) => {
+  const oldSend = res.send;
+  res.send = function(data) {
+    console.log(`[${new Date().toISOString()}] Response for ${req.method} ${req.url}: ${data}`);
+    oldSend.apply(res, arguments);
+  };
+  next();
+};
 
 const PORT = process.env.PORT || 3000;
+
+app.use(logRequest);
+app.use(logResponse);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

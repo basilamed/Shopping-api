@@ -50,6 +50,7 @@ const handleRegister = async (req, res) => {
 
 const handleLogin = async (req, res) => {
     const { email, password } = req.body;
+    console.log('handleLogin:', email, password);
 
     let existingUser = null;
     try {
@@ -114,6 +115,18 @@ const getUserById = async (req, res) => {
     } catch (err) {
         res.status(500).json({
             message: 'Error fetching product',
+            error: err
+        });
+    }
+}
+
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find();
+        res.json(users);
+    } catch (err) {
+        res.status(500).json({
+            message: 'Error fetching users',
             error: err
         });
     }
@@ -255,7 +268,8 @@ module.exports = {
     deleteUser,
     changePassword,
     sendVerificationCode,
-    resetPassword
+    resetPassword,
+    getAllUsers
 }
 
 

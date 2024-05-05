@@ -9,11 +9,11 @@ const Mailgen = require('mailgen');
 
 require('dotenv').config();
 
-const transporter = nodemailer.createTransport(sendgridTransport({
-    auth: {
-        api_key: process.env.SENDGRID_API_KEY
-    }
-}))
+// const transporter = nodemailer.createTransport(sendgridTransport({
+//     auth: {
+//         api_key: process.env.SENDGRID_API_KEY
+//     }
+// }))
 
 const handleRegister = async (req, res) => {
     const { email, password } = req.body;
@@ -84,7 +84,7 @@ const handleRegister = async (req, res) => {
             html: emailBody
         }
 
-        tran.sendMail(message, (err, info) => {
+        return tran.sendMail(message, (err, info) => {
           if(err){
               console.log(err);
               res.status(500).json({ error: err.message });
@@ -93,12 +93,7 @@ const handleRegister = async (req, res) => {
               res.status(200).json({ message: 'Email sent ' });
           }
       });
-      return transporter.sendMail({
-          to: email,
-          from: process.env.SENDER_EMAIL,
-          subject: 'Verify your email',
-          html: `<h1>Verification code: ${verificationCode}</h1>`
-      })
+      //return tran.sendMail(message);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

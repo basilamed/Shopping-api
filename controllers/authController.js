@@ -294,7 +294,7 @@ const updateUser = async (req, res) => {
 
     let response = {
         body: {
-            name: firstName,
+            name: 'dear user',
             intro: 'Forgot your password? No problem.',
             action: {
                 instructions: 'To change your password, this is you varification code:',

@@ -84,21 +84,16 @@ const handleRegister = async (req, res) => {
             html: emailBody
         }
 
-        return tran.sendMail(message, (err, info) => {
-          if(err){
-              console.log(err);
-              return res.status(500).json({ error: err.message });
-          } else {
-              console.log(info);
-              return res.status(201).json({ message: 'User created successfully' });
-          }
-      });
-        // return transporter.sendMail({
-        //     to: email,
-        //     from: process.env.SENDER_EMAIL,
-        //     subject: 'Verify your email',
-        //     html: `<h1>Verification code: ${verificationCode}</h1>`
-        // })
+      //   return tran.sendMail(message, (err, info) => {
+      //     if(err){
+      //         console.log(err);
+      //         return res.status(500).json({ error: err.message });
+      //     } else {
+      //         console.log(info);
+      //         return res.status(201).json({ message: 'User created successfully' });
+      //     }
+      // });
+        return tran.sendMail(message)
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

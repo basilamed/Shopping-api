@@ -3,16 +3,30 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const sendgridTransport = require('nodemailer-sendgrid-transport');
+//const mailer = require('nodemailer');
+const Mailgen = require('mailgen');
+
+
 require('dotenv').config();
 
-const transporter = nodemailer.createTransport(sendgridTransport({
-    auth: {
-        api_key: process.env.SENDGRID_API_KEY
-    }
-}))
+// const transporter = nodemailer.createTransport(sendgridTransport({
+//     auth: {
+//         api_key: process.env.SENDGRID_API_KEY
+//     }
+// }))
 
 const handleRegister = async (req, res) => {
     const { email, password } = req.body;
+    const config = {
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      auth: {
+          user: process.env.EMAIL,
+          pass: process.env.PASSWORD
+      }
+  
+  }
 
     if (!email || !password)
     return res.status(400).json({'message': 'Email and password are required'});
@@ -36,13 +50,55 @@ const handleRegister = async (req, res) => {
         });
         console.log(newUser);
         await newUser.save();
-        res.status(201).json({ message: 'User created successfully' });
-        return transporter.sendMail({
-            to: email,
-            from: process.env.SENDER_EMAIL,
-            subject: 'Verify your email',
-            html: `<h1>Verification code: ${verificationCode}</h1>`
+        //res.status(201).json({ message: 'User created successfully' });
+        let tran = nodemailer.createTransport(config);
+        let mailgen = new Mailgen({
+            theme: 'default',
+            product: {
+                name: 'Mailgen',
+                link: 'https://mailgen.js/'
+            }
         })
+
+        let response = {
+            body: {
+                name: firstName,
+                intro: 'Welcome to ShopperAsisstant! We\'re very excited to have you on board.',
+                action: {
+                    instructions: 'To get started with ShopperAsisstant, this is you varification code:',
+                    button: {
+                        color: '#22BC66',
+                        text: verificationCode
+                    }
+                },
+                outro: 'Need help, or have questions? Just reply to this email, we\'d love to help.'
+            }
+
+        }
+
+        let emailBody = mailgen.generate(response);
+        let message={
+            from: process.env.EMAIL,
+            to: email,
+            subject: 'Welcome to ShopperAsisstant',
+            html: emailBody
+        }
+
+        tran.sendMail(message, (err, info) => {
+          if(err){
+              console.log(err);
+              return res.status(501).json({ error: err.message });
+          } else {
+              console.log(info);
+              return res.status(200).json({ message: 'Verification email sent' });
+          }
+      });
+        // return transporter.sendMail({
+        //     to: email,
+        //     from: process.env.SENDER_EMAIL,
+        //     subject: 'Verify your email',
+        //     html: `<h1>Verification code: ${verificationCode}</h1>`
+        // })
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -213,20 +269,63 @@ const updateUser = async (req, res) => {
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
-  
+      const config = {
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        auth: {
+            user: process.env.EMAIL,
+            pass: process.env.PASSWORD
+        }
+    
+    }
+    let tran = nodemailer.createTransport(config);
       const verificationCode = Math.floor(10000 + Math.random() * 90000);
       user.verificationCode = verificationCode;
       await user.save();
   
-      // Slanje koda za verifikaciju putem e-pošte
-      await transporter.sendMail({
+      let mailgen = new Mailgen({
+        theme: 'default',
+        product: {
+            name: 'Mailgen',
+            link: 'https://mailgen.js/'
+        }
+    })
+
+    let response = {
+        body: {
+            name: firstName,
+            intro: 'Forgot your password? No problem.',
+            action: {
+                instructions: 'To change your password, this is you varification code:',
+                button: {
+                    color: '#22BC66',
+                    text: verificationCode
+                }
+            },
+            outro: 'Need help, or have questions? Just reply to this email, we\'d love to help.'
+        }
+
+    }
+
+    let emailBody = mailgen.generate(response);
+    let message={
+        from: process.env.EMAIL,
         to: email,
-        from: process.env.SENDER_EMAIL,
-        subject: 'Reset Password Verification Code',
-        html: `<h1>Your verification code: ${verificationCode}</h1>`
-      });
+        subject: 'Welcome to ShopperAsisstant',
+        html: emailBody
+    }
+
+    tran.sendMail(message, (err, info) => {
+      if(err){
+          console.log(err);
+          return res.status(501).json({ error: err.message });
+      } else {
+          console.log(info);
+          return res.status(200).json({ message: 'Verification email sent' });
+      }
+  });
   
-      res.json({ message: 'Verification code sent successfully' });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }

@@ -84,13 +84,13 @@ const handleRegister = async (req, res) => {
             html: emailBody
         }
 
-        tran.sendMail(message, (err, info) => {
+        return tran.sendMail(message, (err, info) => {
           if(err){
               console.log(err);
-              return res.status(501).json({ error: err.message });
+              return res.status(500).json({ error: err.message });
           } else {
               console.log(info);
-              return res.status(200).json({ message: 'Verification email sent' });
+              return res.status(201).json({ message: 'User created successfully' });
           }
       });
         // return transporter.sendMail({

@@ -9,11 +9,11 @@ const Mailgen = require('mailgen');
 
 require('dotenv').config();
 
-// const transporter = nodemailer.createTransport(sendgridTransport({
-//     auth: {
-//         api_key: process.env.SENDGRID_API_KEY
-//     }
-// }))
+const transporter = nodemailer.createTransport(sendgridTransport({
+    auth: {
+        api_key: process.env.SENDGRID_API_KEY
+    }
+}))
 
 const handleRegister = async (req, res) => {
     const { email, password } = req.body;
@@ -84,16 +84,22 @@ const handleRegister = async (req, res) => {
             html: emailBody
         }
 
-      //   return tran.sendMail(message, (err, info) => {
-      //     if(err){
-      //         console.log(err);
-      //         return res.status(500).json({ error: err.message });
-      //     } else {
-      //         console.log(info);
-      //         return res.status(201).json({ message: 'User created successfully' });
-      //     }
-      // });
-        return tran.sendMail(message)
+        tran.sendMail(message, (err, info) => {
+          if(err){
+              console.log(err);
+              res.status(500).json({ error: err.message });
+          } else {
+              console.log(info);
+              res.status(201).json({ message: 'User created successfully' });
+          }
+      });
+      res.status(201).json({ message: 'User created successfully' });
+      return transporter.sendMail({
+          to: email,
+          from: process.env.SENDER_EMAIL,
+          subject: 'Verify your email',
+          html: `<h1>Verification code: ${verificationCode}</h1>`
+      })
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

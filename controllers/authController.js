@@ -90,10 +90,9 @@ const handleRegister = async (req, res) => {
               res.status(500).json({ error: err.message });
           } else {
               console.log(info);
-              res.status(201).json({ message: 'User created successfully' });
+              res.status(200).json({ message: 'Email sent ' });
           }
       });
-      res.status(201).json({ message: 'User created successfully' });
       return transporter.sendMail({
           to: email,
           from: process.env.SENDER_EMAIL,

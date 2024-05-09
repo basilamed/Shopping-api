@@ -155,7 +155,6 @@ const getByBarcode = async (req, res) => {
       console.log('Product barcode:', barCode);
   
       const products = await Product.find({ barCode }).populate('comments')
-      .populate('compositions')
       .populate('ratings') 
       .populate('user') 
       .exec();

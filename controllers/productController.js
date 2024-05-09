@@ -104,7 +104,7 @@ const updateById = async (req, res) => {
 
 const getProductsByType = async (req, res) => {
     try {
-        const typeId = req.params.typeId;
+        const typeId = req.params.categoryId;
         const products = await Product.find({ type: typeId });
         res.json(products);
     } catch (err) {

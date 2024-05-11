@@ -12,7 +12,8 @@ const addProduct = async (req, res) => {
             user: req.body.user,
             type: req.body.type,
             company: req.body.company,
-            price: req.body.price
+            price: req.body.price,
+            discount: req.body.discount
         });
         const result = await product.save();
         res.status(201).json({

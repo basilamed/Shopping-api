@@ -45,7 +45,7 @@ const handleRegister = async (req, res) => {
             email,
             password: hashedPassword,
             verificationCode,
-            verified: false,
+            verified: true,
             role: 'user',
         });
         console.log(newUser);

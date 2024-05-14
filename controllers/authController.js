@@ -9,12 +9,6 @@ const Mailgen = require('mailgen');
 
 require('dotenv').config();
 
-// const transporter = nodemailer.createTransport(sendgridTransport({
-//     auth: {
-//         api_key: process.env.SENDGRID_API_KEY
-//     }
-// }))
-
 const handleRegister = async (req, res) => {
     const { email, password } = req.body;
     const config = {
@@ -45,7 +39,7 @@ const handleRegister = async (req, res) => {
             email,
             password: hashedPassword,
             verificationCode,
-            verified: true,
+            verified: false,
             role: 'user',
         });
         console.log(newUser);
@@ -97,6 +91,44 @@ const handleRegister = async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+}
+
+const handleGoogleAuth = async (req, res) => {
+  console.log('handleGoogleAuth:', req.body);
+  //find if the user exists
+  const { email, firstName, lastName } = req.body;
+  let existingUser = null;
+  existingUser = await User.findOne({ email });
+  if (existingUser) {
+    const token = jwt.sign(
+      { email: existingUser.email, id: existingUser._id },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: '1h' }
+    );
+    return res.status(200).json({ result: existingUser, token, message: 'User logged in successfully'});
+  }
+  //create a new user
+  const salt = await bcrypt.genSalt();
+  const password = email + process.env.ACCESS_TOKEN_SECRET;
+  const hashedPassword = await bcrypt.hash(password, salt);
+  const verificationCode = Math.floor(10000 + Math.random() * 90000);
+  const newUser = new User({
+    firstName,
+    lastName,
+    email,
+    password: hashedPassword,
+    verificationCode,
+    verified: true,
+    role: 'user', 
+  });
+  await newUser.save();
+  const token = jwt.sign(
+    { email: newUser.email, id: newUser._id },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: '1h' }
+  );
+  return res.status(200).json({ result: newUser, token, message: 'User created successfully'});
+
 }
 
 const handleLogin = async (req, res) => {
@@ -363,7 +395,8 @@ module.exports = {
     changePassword,
     sendVerificationCode,
     resetPassword,
-    getAllUsers
+    getAllUsers,
+    handleGoogleAuth
 }
 
 

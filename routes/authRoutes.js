@@ -12,5 +12,6 @@ router.put('/change-password/:userId', UserController.changePassword);
 router.post('/send-verification-code', UserController.sendVerificationCode);
 router.get('/get-all-users', UserController.getAllUsers);
 router.post('/reset-password', UserController.resetPassword);
+router.post('/google', UserController.handleGoogleAuth);
 
 module.exports = router;
